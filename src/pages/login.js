@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase'; // Import Firebase services
-import './login.css';
+import './Login.css'; // Import CSS for styling
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -15,20 +15,25 @@ const Login = () => {
         e.preventDefault();
 
         try {
+            // Sign in with email and password
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
             // Fetch admin data from Firestore
             const adminDoc = await getDoc(doc(db, 'admins', user.uid));
             if (adminDoc.exists()) {
+                // Store login status and admin data in localStorage
                 localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('adminData', JSON.stringify(adminDoc.data())); // Store admin data
-                navigate('/home'); // Redirect to home page after successful login
+                localStorage.setItem('adminData', JSON.stringify(adminDoc.data()));
+
+                // Redirect to the home page (or dashboard)
+                navigate('/home');
             } else {
                 setError('Admin data not found.');
             }
         } catch (error) {
-            setError(error.message); // Display error message
+            // Handle errors (e.g., invalid email/password)
+            setError(error.message);
         }
     };
 
@@ -37,6 +42,7 @@ const Login = () => {
             <div className="login-card">
                 <h2 className="login-title">Admin Login</h2>
                 <form onSubmit={handleLogin}>
+                    {/* Email Input */}
                     <div className="form-group">
                         <input
                             type="email"
@@ -47,6 +53,8 @@ const Login = () => {
                         />
                         <label htmlFor="email">Email</label>
                     </div>
+
+                    {/* Password Input */}
                     <div className="form-group">
                         <input
                             type="password"
@@ -57,11 +65,17 @@ const Login = () => {
                         />
                         <label htmlFor="password">Password</label>
                     </div>
+
+                    {/* Error Message */}
                     {error && <div className="alert alert-danger">{error}</div>}
+
+                    {/* Login Button */}
                     <button type="submit" className="login-button">
                         Login
                     </button>
                 </form>
+
+                {/* Sign Up Link */}
                 <p className="text-center mt-3">
                     Don't have an account? <a href="/signup" className="text-white">Sign up here</a>
                 </p>

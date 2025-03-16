@@ -31,6 +31,7 @@
     max-width: 400px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
 }
 
 .login-title {
@@ -102,4 +103,49 @@
     border-radius: 5px;
     margin-bottom: 20px;
     text-align: center;
+}
+/* Services Container (rows) */
+.services-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between cards */
+    justify-content: space-between;
+    margin-top: 20px;
+}
+/* Services Container (buttons) */
+.services-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between buttons */
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Service Button */
+.service-button {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 20px;
+    flex: 1 1 calc(33.33% - 20px); /* Three buttons per row with spacing */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.3s ease;
+}
+
+.service-button:hover {
+    background: rgba(230, 230, 230, 0.2);
+}
+
+.service-button h3 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.service-button p {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
 }

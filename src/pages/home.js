@@ -1,31 +1,49 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Login.css'; // Reuse the same CSS for consistent styling
 
 const Home = () => {
-    return (
-        <div>
-            {/* Hero Section */}
-            <div className="bg-primary text-white text-center py-5">
-                <h1 className="display-4">Welcome to Parking Management System</h1>
-                <p className="lead">Efficiently manage parking spaces and detect license plates with ease.</p>
-                <a href="/admin" className="btn btn-light btn-lg">Go to Admin Panel</a>
-            </div>
+    const navigate = useNavigate();
+    const adminData = JSON.parse(localStorage.getItem('adminData')); // Get admin data from localStorage
 
-            {/* Features Section */}
-            <div className="container my-5">
-                <div className="row">
-                    <div className="col-md-4 text-center">
-                        <h2>Easy Management</h2>
-                        <p>Manage parking slots and vehicles effortlessly.</p>
-                    </div>
-                    <div className="col-md-4 text-center">
-                        <h2>License Plate Detection</h2>
-                        <p>Automatically detect license plates using AI.</p>
-                    </div>
-                    <div className="col-md-4 text-center">
-                        <h2>Real-Time Updates</h2>
-                        <p>Get real-time updates on parking status.</p>
-                    </div>
+    const handleLogout = () => {
+        localStorage.removeItem('isLoggedIn'); // Clear login status
+        localStorage.removeItem('adminData'); // Clear admin data
+        navigate('/login'); // Redirect to login page
+    };
+
+    // Function to navigate to different services
+    const navigateToService = (service) => {
+        navigate(`/${service}`); // Navigate to the service route
+    };
+
+    return (
+        <div className="login-container">
+            <div className="login-card">
+                <h2 className="login-title">Admin Dashboard</h2>
+
+                {/* Services Section (as buttons) */}
+                <div className="services-container">
+                    {/* Profile Button */}
+                    <button className="service-button" onClick={() => navigateToService('profile')}>
+                        <h3>Profile</h3>
+                        <p>View and manage your profile.</p>
+                    </button>
+
+                    {/* Reports Button */}
+                    <button className="service-button" onClick={() => navigateToService('reports')}>
+                        <h3>Reports</h3>
+                        <p>View and reply to user reports.</p>
+                    </button>
+
+                    {/* User Tracking Button */}
+                    <button className="service-button" onClick={() => navigateToService('user-tracking')}>
+                        <h3>User Tracking</h3>
+                        <p>Track user activity and parking records.</p>
+                    </button>
                 </div>
+
+                
             </div>
         </div>
     );
