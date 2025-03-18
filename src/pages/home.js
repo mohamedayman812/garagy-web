@@ -41,9 +41,18 @@ const Home = () => {
                         <h3>User Tracking</h3>
                         <p>Track user activity and parking records.</p>
                     </button>
+
+                    {/* Garage Layout Button */}
+                    <button className="service-button" onClick={() => navigateToService('garage-layout')}>
+                        <h3>Garage Layout</h3>
+                        <p>View and update the garage layout.</p>
+                    </button>
                 </div>
 
-                
+                {/* Logout Button */}
+                <button onClick={handleLogout} className="login-button" style={{ marginTop: '20px' }}>
+                    Logout
+                </button>
             </div>
         </div>
     );

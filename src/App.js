@@ -3,11 +3,12 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Navbar from './components/Navbar';
 import Footer from './components/footer';
 import Home from './pages/home';
-import Login from './pages/Login';
+import Login from './pages/login';
 import SignUp from './pages/SignUp';
-import Profile from './pages/Profile'; // Import Profile component
-import Reports from './pages/Reports'; // Import Reports component
-import UserTracking from './pages/UserTracking'; // Import UserTracking component
+import Profile from './pages/Profile';
+import Reports from './pages/Reports';
+import UserTracking from './pages/UserTracking';
+import GarageLayout from './pages/GarageLayout'; // Import GarageLayout
 import ProtectedRoute from './components/protectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -51,6 +52,14 @@ function App() {
                             element={
                                 <ProtectedRoute>
                                     <UserTracking />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/garage-layout"
+                            element={
+                                <ProtectedRoute>
+                                    <GarageLayout />
                                 </ProtectedRoute>
                             }
                         />
