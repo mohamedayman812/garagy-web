@@ -1,160 +1,228 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase'; // Import Firestore
-import './Login.css'; // Reuse the same CSS for consistent styling
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { db } from '../firebase';
+import './GarageLayout.css';
 
 const GarageLayout = () => {
     const navigate = useNavigate();
-    const [sections, setSections] = useState([]);
-    const [numSections, setNumSections] = useState(0);
-    const [slotsPerSection, setSlotsPerSection] = useState(0);
-    const [isEditing, setIsEditing] = useState(false);
+    const [garageId, setGarageId] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [mode, setMode] = useState('create');
+    const [layoutConfig, setLayoutConfig] = useState({
+        sectionCount: 1,
+        slotsPerSection: 1
+    });
+    const [layout, setLayout] = useState([]); // Initialize as empty array
 
-    // Fetch the garage layout from Firestore
     useEffect(() => {
-        const fetchLayout = async () => {
+        const fetchGarageData = async () => {
             try {
-                const layoutDoc = await getDoc(doc(db, 'garage', 'layout'));
-                if (layoutDoc.exists()) {
-                    console.log('Layout data:', layoutDoc.data());
-                    setSections(layoutDoc.data().sections);
-                } else {
-                    console.log('No layout found.');
+                const auth = getAuth();
+                const user = auth.currentUser;
+                
+                if (!user) {
+                    navigate('/login');
+                    return;
+                }
+
+                const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+                if (adminDoc.exists()) {
+                    const garageId = adminDoc.data().garageId;
+                    setGarageId(garageId);
+                    
+                    const garageDoc = await getDoc(doc(db, 'garages', garageId));
+                    if (garageDoc.exists()) {
+                        const garageData = garageDoc.data();
+                        // Safely check for layout data
+                        if (garageData.layout && garageData.layout.sections) {
+                            setLayout(garageData.layout.sections || []);
+                            setLayoutConfig({
+                                sectionCount: garageData.layout.sectionCount || 1,
+                                slotsPerSection: garageData.layout.slotsPerSection || 1
+                            });
+                            setMode('edit');
+                        }
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching layout:', error);
+                console.error('Error fetching garage data:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
-        fetchLayout();
-    }, []);
 
-    // Save the garage layout to Firestore
+        fetchGarageData();
+    }, [navigate]);
+
+    const handleConfigChange = (e) => {
+        const { name, value } = e.target;
+        setLayoutConfig(prev => ({
+            ...prev,
+            [name]: Math.max(1, parseInt(value) || 1)
+        }));
+    };
+
+    const generateLayout = () => {
+        const { sectionCount, slotsPerSection } = layoutConfig;
+        const newLayout = [];
+
+        for (let i = 0; i < sectionCount; i++) {
+            const slots = [];
+            for (let j = 0; j < slotsPerSection; j++) {
+                slots.push({
+                    id: `${i+1}-${j+1}`,
+                    status: 'available'
+                });
+            }
+            newLayout.push({
+                id: i+1,
+                name: `Section ${i+1}`,
+                slots
+            });
+        }
+
+        setLayout(newLayout);
+    };
+
     const saveLayout = async () => {
+        if (!garageId) return;
+        
+        setIsLoading(true);
         try {
-            const newSections = Array.from({ length: numSections }, (_, i) => ({
-                sectionId: i + 1,
-                slots: Array.from({ length: slotsPerSection }, (_, j) => ({
-                    slotId: j + 1,
-                    status: 'available', // Default status
-                })),
-            }));
-
-            await setDoc(doc(db, 'garage', 'layout'), { sections: newSections });
-            console.log('Layout saved successfully.');
-            setSections(newSections);
-            setIsEditing(false);
+            await updateDoc(doc(db, 'garages', garageId), {
+                layout: {
+                    sections: layout,
+                    sectionCount: layoutConfig.sectionCount,
+                    slotsPerSection: layoutConfig.slotsPerSection,
+                    lastUpdated: new Date()
+                }
+            });
+            setMode('edit');
         } catch (error) {
             console.error('Error saving layout:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Update the garage layout in Firestore
-    const updateLayout = async () => {
-        try {
-            const newSections = Array.from({ length: numSections }, (_, i) => ({
-                sectionId: i + 1,
-                slots: Array.from({ length: slotsPerSection }, (_, j) => ({
-                    slotId: j + 1,
-                    status: 'available', // Default status
-                })),
-            }));
-
-            await setDoc(doc(db, 'garage', 'layout'), { sections: newSections });
-            console.log('Layout updated successfully.');
-            setSections(newSections);
-            setIsEditing(false);
-        } catch (error) {
-            console.error('Error updating layout:', error);
-        }
-    };
-
-    // Toggle slot status (available/unavailable)
     const toggleSlotStatus = (sectionId, slotId) => {
-        const updatedSections = sections.map((section) => {
-            if (section.sectionId === sectionId) {
+        setLayout(prev => prev.map(section => {
+            if (section.id === sectionId) {
                 return {
                     ...section,
-                    slots: section.slots.map((slot) => {
-                        if (slot.slotId === slotId) {
+                    slots: section.slots.map(slot => {
+                        if (slot.id === slotId) {
                             return {
                                 ...slot,
-                                status: slot.status === 'available' ? 'unavailable' : 'available',
+                                status: slot.status === 'available' ? 'unavailable' : 'available'
                             };
                         }
                         return slot;
-                    }),
+                    })
                 };
             }
             return section;
-        });
-        setSections(updatedSections);
+        }));
     };
 
-    return (
-        <div className="login-container">
-            <div className="login-card">
-                <h2 className="login-title">Garage Layout</h2>
+    if (isLoading) {
+        return (
+            <div className="garage-layout-container">
+                <div className="loading-message">Loading garage layout...</div>
+            </div>
+        );
+    }
 
-                {sections.length === 0 || isEditing ? (
-                    // If no layout exists or editing is enabled, allow the admin to create/update one
-                    <div className="layout-form">
-                        <h3>{sections.length === 0 ? 'Create Garage Layout' : 'Update Garage Layout'}</h3>
-                        <div className="form-group">
-                            <label htmlFor="numSections">Number of Sections</label>
+    // Safely check if layout exists and has sections
+    const hasLayout = Array.isArray(layout) && layout.length > 0;
+
+    return (
+        <div className="garage-layout-container">
+            <h2>Garage Layout</h2>
+            
+            {mode === 'create' ? (
+                <div className="layout-configuration">
+                    <h3> Layout settings</h3>
+                    <div className="config-inputs">
+                        <div className="input-group">
+                            <label>Number of Sections:</label>
                             <input
                                 type="number"
-                                id="numSections"
-                                value={numSections}
-                                onChange={(e) => setNumSections(Number(e.target.value))}
-                                required
+                                name="sectionCount"
+                                min="1"
+                                max="20"
+                                value={layoutConfig.sectionCount}
+                                onChange={handleConfigChange}
                             />
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="slotsPerSection">Slots per Section</label>
+                        <div className="input-group">
+                            <label>Slots per Section:</label>
                             <input
                                 type="number"
-                                id="slotsPerSection"
-                                value={slotsPerSection}
-                                onChange={(e) => setSlotsPerSection(Number(e.target.value))}
-                                required
+                                name="slotsPerSection"
+                                min="1"
+                                max="50"
+                                value={layoutConfig.slotsPerSection}
+                                onChange={handleConfigChange}
                             />
                         </div>
-                        <button onClick={sections.length === 0 ? saveLayout : updateLayout} className="login-button">
-                            {sections.length === 0 ? 'Save Layout' : 'Update Layout'}
-                        </button>
                     </div>
-                ) : (
-                    // If layout exists, display it
-                    <div className="layout-display">
-                        <h3>Current Layout</h3>
-                        {sections.map((section) => (
-                            <div key={section.sectionId} className="section">
-                                <h4>Section {section.sectionId}</h4>
-                                <div className="slots">
-                                    {section.slots.map((slot) => (
+                    <button 
+                        onClick={generateLayout}
+                        className="action-button"
+                    >
+                        Generate Layout
+                    </button>
+                </div>
+            ) : (
+                <button 
+                    onClick={() => setMode('create')}
+                    className="action-button"
+                >
+                    Create New Layout
+                </button>
+            )}
+
+            {hasLayout && (
+                <div className="layout-preview">
+                    <h3>{mode === 'create' ? 'Preview' : 'Current Layout'}</h3>
+                    <div className="sections-container">
+                        {layout.map(section => (
+                            <div key={section.id} className="section">
+                                <h4>{section.name}</h4>
+                                <div className="slots-grid">
+                                    {section.slots.map(slot => (
                                         <div
-                                            key={slot.slotId}
+                                            key={slot.id}
                                             className={`slot ${slot.status}`}
-                                            onClick={() => toggleSlotStatus(section.sectionId, slot.slotId)}
+                                            onClick={() => toggleSlotStatus(section.id, slot.id)}
                                         >
-                                            <p>Slot {slot.slotId}: {slot.status}</p>
+                                            <span>Slot {slot.id.split('-')[1]}</span>
+                                            <div className="status-indicator"></div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         ))}
-                        <button onClick={() => setIsEditing(true)} className="login-button">
-                            Update Layout
-                        </button>
                     </div>
-                )}
+                    <button 
+                        onClick={saveLayout}
+                        className="save-button"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Saving...' : 'Save Layout'}
+                    </button>
+                </div>
+            )}
 
-                {/* Back to Dashboard Button */}
-                <button onClick={() => navigate('/home')} className="login-button" style={{ marginTop: '20px' }}>
-                    Back to Dashboard
-                </button>
-            </div>
+            <button 
+                onClick={() => navigate('/home')}
+                className="back-button"
+            >
+                Back to Dashboard
+            </button>
         </div>
     );
 };

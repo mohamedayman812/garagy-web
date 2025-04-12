@@ -1,36 +1,114 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { db, auth } from '../firebase'; // Import Firebase services
+import { doc, setDoc, collection } from 'firebase/firestore';
+import { db } from '../firebase';
 import './Login.css';
 
 const SignUp = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        garageName: '',
+        garageLocation: ''
+    });
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     const handleSignUp = async (e) => {
         e.preventDefault();
+        setError('');
+        
+        // Validation
+        if (!formData.name || !formData.email || !formData.password || 
+            !formData.garageName || !formData.garageLocation) {
+            setError('Please fill in all fields');
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            setError('Password should be at least 6 characters');
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
             const auth = getAuth();
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            
+            // 1. Create user account
+            console.log("Creating user account...");
+            const userCredential = await createUserWithEmailAndPassword(
+                auth, 
+                formData.email, 
+                formData.password
+            );
             const user = userCredential.user;
+            console.log("User created:", user.uid);
 
-            // Store admin data in Firestore
-            await setDoc(doc(db, 'admins', user.uid), {
-                name: name,
-                email: email,
-                type: 'admin', // Default admin type
+            // 2. Create garage document
+            console.log("Creating garage document...");
+            const garageRef = doc(collection(db, 'garages'));
+            await setDoc(garageRef, {
+                name: formData.garageName,
+                location: formData.garageLocation,
                 createdAt: new Date(),
+                layout: {}
+            });
+            console.log("Garage created:", garageRef.id);
+
+            // 3. Create admin document in garage subcollection
+            console.log("Creating admin subdocument...");
+            await setDoc(doc(db, 'garages', garageRef.id, 'admins', user.uid), {
+                uid: user.uid,
+                name: formData.name,
+                email: formData.email,
+                role: 'owner',
+                createdAt: new Date()
             });
 
-            navigate('/login'); // Redirect to login page after successful sign-up
-        } catch (error) {
-            setError(error.message); // Display error message
+            // 4. Create main admin document
+            console.log("Creating main admin document...");
+            await setDoc(doc(db, 'admins', user.uid), {
+                uid: user.uid,
+                name: formData.name,
+                email: formData.email,
+                garageId: garageRef.id,
+                role: 'owner',
+                createdAt: new Date()
+            });
+
+            console.log("Signup successful!");
+            navigate('/login');
+        } catch (err) {
+            console.error("Signup error details:", {
+                code: err.code,
+                message: err.message,
+                stack: err.stack
+            });
+            
+            let errorMessage = 'Failed to create account. Please try again.';
+            if (err.code === 'auth/email-already-in-use') {
+                errorMessage = 'Email already in use';
+            } else if (err.code === 'auth/weak-password') {
+                errorMessage = 'Password should be at least 6 characters';
+            } else if (err.code === 'auth/invalid-email') {
+                errorMessage = 'Invalid email address';
+            }
+            
+            setError(errorMessage);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -38,40 +116,27 @@ const SignUp = () => {
         <div className="login-container">
             <div className="login-card">
                 <h2 className="login-title">Admin Sign Up</h2>
+                {error && <div className="alert alert-danger">{error}</div>}
                 <form onSubmit={handleSignUp}>
-                    <div className="form-group">
-                        <input
-                            type="text"
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                        />
-                        <label htmlFor="name">Name</label>
-                    </div>
-                    <div className="form-group">
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                        <label htmlFor="email">Email</label>
-                    </div>
-                    <div className="form-group">
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                        <label htmlFor="password">Password</label>
-                    </div>
-                    {error && <div className="alert alert-danger">{error}</div>}
-                    <button type="submit" className="login-button">
-                        Sign Up
+                    {['name', 'email', 'password', 'garageName', 'garageLocation'].map((field) => (
+                        <div className="form-group" key={field}>
+                            <input
+                                type={field === 'password' ? 'password' : field === 'email' ? 'email' : 'text'}
+                                id={field}
+                                name={field}
+                                value={formData[field]}
+                                onChange={handleChange}
+                                required
+                            />
+                            <label htmlFor={field}>
+                                {field === 'garageName' ? 'Garage Name' : 
+                                 field === 'garageLocation' ? 'Garage Location' : 
+                                 field.charAt(0).toUpperCase() + field.slice(1)}
+                            </label>
+                        </div>
+                    ))}
+                    <button type="submit" className="login-button" disabled={isLoading}>
+                        {isLoading ? 'Creating Account...' : 'Sign Up'}
                     </button>
                 </form>
                 <p className="text-center mt-3">

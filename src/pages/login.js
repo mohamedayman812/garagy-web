@@ -1,39 +1,75 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { db, auth } from '../firebase'; // Import Firebase services
-import './Login.css'; // Import CSS for styling
+import { db } from '../firebase';
+import './Login.css';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setError('');
+        
+        if (!formData.email || !formData.password) {
+            setError('Please fill in all fields');
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
-            // Sign in with email and password
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const auth = getAuth();
+            const userCredential = await signInWithEmailAndPassword(
+                auth,
+                formData.email,
+                formData.password
+            );
             const user = userCredential.user;
 
-            // Fetch admin data from Firestore
+            // Check admin privileges
             const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-            if (adminDoc.exists()) {
-                // Store login status and admin data in localStorage
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('adminData', JSON.stringify(adminDoc.data()));
-
-                // Redirect to the home page (or dashboard)
-                navigate('/home');
-            } else {
-                setError('Admin data not found.');
+            
+            if (!adminDoc.exists()) {
+                await auth.signOut();
+                throw new Error('Admin privileges not found for this account');
             }
-        } catch (error) {
-            // Handle errors (e.g., invalid email/password)
-            setError(error.message);
+
+            // Verify garage exists
+            const garageDoc = await getDoc(doc(db, 'garages', adminDoc.data().garageId));
+            if (!garageDoc.exists()) {
+                throw new Error('Associated garage not found');
+            }
+
+            // Redirect to home or previous location
+            const to = location.state?.from?.pathname || '/home';
+            navigate(to, { replace: true });
+
+        } catch (err) {
+            console.error("Login error:", err);
+            setError(
+                err.code === 'auth/user-not-found' ? 'Account not found' :
+                err.code === 'auth/wrong-password' ? 'Incorrect password' :
+                err.message
+            );
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -41,41 +77,36 @@ const Login = () => {
         <div className="login-container">
             <div className="login-card">
                 <h2 className="login-title">Admin Login</h2>
+                {error && <div className="alert alert-danger">{error}</div>}
                 <form onSubmit={handleLogin}>
-                    {/* Email Input */}
                     <div className="form-group">
                         <input
                             type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
                             required
                         />
-                        <label htmlFor="email">Email</label>
+                        <label>Email</label>
                     </div>
-
-                    {/* Password Input */}
                     <div className="form-group">
                         <input
                             type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
                             required
                         />
-                        <label htmlFor="password">Password</label>
+                        <label>Password</label>
                     </div>
-
-                    {/* Error Message */}
-                    {error && <div className="alert alert-danger">{error}</div>}
-
-                    {/* Login Button */}
-                    <button type="submit" className="login-button">
-                        Login
+                    <button 
+                        type="submit" 
+                        className="login-button" 
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
-
-                {/* Sign Up Link */}
                 <p className="text-center mt-3">
                     Don't have an account? <a href="/signup" className="text-white">Sign up here</a>
                 </p>

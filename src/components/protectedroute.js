@@ -1,14 +1,18 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+// components/ProtectedRoute.js
+import { useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { getAuth } from 'firebase/auth';
 
 const ProtectedRoute = ({ children }) => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn'); // Check if admin is logged in
+    const auth = getAuth();
+    const location = useLocation();
 
-    if (!isLoggedIn) {
-        return <Navigate to="/" />; // Redirect to login if not logged in
+    if (!auth.currentUser) {
+        // Redirect to login but save the location they tried to go to
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    return children; // Render the protected component
+    return children;
 };
 
 export default ProtectedRoute;
