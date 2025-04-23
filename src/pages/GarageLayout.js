@@ -12,9 +12,9 @@ const GarageLayout = () => {
     const [mode, setMode] = useState('create');
     const [layoutConfig, setLayoutConfig] = useState({
         sectionCount: 1,
-        slotsPerSection: 1
+        sectionSlots: [1] // Array to store slots for each section
     });
-    const [layout, setLayout] = useState([]); // Initialize as empty array
+    const [layout, setLayout] = useState([]);
 
     useEffect(() => {
         const fetchGarageData = async () => {
@@ -35,12 +35,16 @@ const GarageLayout = () => {
                     const garageDoc = await getDoc(doc(db, 'garages', garageId));
                     if (garageDoc.exists()) {
                         const garageData = garageDoc.data();
-                        // Safely check for layout data
                         if (garageData.layout && garageData.layout.sections) {
-                            setLayout(garageData.layout.sections || []);
+                            const sections = garageData.layout.sections || [];
+                            setLayout(sections);
+                            
+                            // Initialize sectionSlots array with slot counts for each section
+                            const sectionSlots = sections.map(section => section.slots.length);
+                            
                             setLayoutConfig({
-                                sectionCount: garageData.layout.sectionCount || 1,
-                                slotsPerSection: garageData.layout.slotsPerSection || 1
+                                sectionCount: sections.length,
+                                sectionSlots
                             });
                             setMode('edit');
                         }
@@ -56,32 +60,51 @@ const GarageLayout = () => {
         fetchGarageData();
     }, [navigate]);
 
-    const handleConfigChange = (e) => {
-        const { name, value } = e.target;
+    const handleSectionCountChange = (e) => {
+        const sectionCount = Math.max(1, parseInt(e.target.value) || 1);
+        
+        // Update sectionSlots array to match new section count
+        const newSectionSlots = [...layoutConfig.sectionSlots];
+        if (sectionCount > newSectionSlots.length) {
+            // Add new sections with default 1 slot
+            while (newSectionSlots.length < sectionCount) {
+                newSectionSlots.push(1);
+            }
+        } else {
+            // Remove extra sections
+            newSectionSlots.length = sectionCount;
+        }
+        
+        setLayoutConfig({
+            sectionCount,
+            sectionSlots: newSectionSlots
+        });
+    };
+
+    const handleSlotCountChange = (index, value) => {
+        const newSectionSlots = [...layoutConfig.sectionSlots];
+        newSectionSlots[index] = Math.max(1, parseInt(value) || 1);
         setLayoutConfig(prev => ({
             ...prev,
-            [name]: Math.max(1, parseInt(value) || 1)
+            sectionSlots: newSectionSlots
         }));
     };
 
     const generateLayout = () => {
-        const { sectionCount, slotsPerSection } = layoutConfig;
-        const newLayout = [];
-
-        for (let i = 0; i < sectionCount; i++) {
+        const newLayout = layoutConfig.sectionSlots.map((slotsCount, index) => {
             const slots = [];
-            for (let j = 0; j < slotsPerSection; j++) {
+            for (let j = 0; j < slotsCount; j++) {
                 slots.push({
-                    id: `${i+1}-${j+1}`,
+                    id: `${index+1}-${j+1}`,
                     status: 'available'
                 });
             }
-            newLayout.push({
-                id: i+1,
-                name: `Section ${i+1}`,
+            return {
+                id: index + 1,
+                name: `Section ${index + 1}`,
                 slots
-            });
-        }
+            };
+        });
 
         setLayout(newLayout);
     };
@@ -94,8 +117,7 @@ const GarageLayout = () => {
             await updateDoc(doc(db, 'garages', garageId), {
                 layout: {
                     sections: layout,
-                    sectionCount: layoutConfig.sectionCount,
-                    slotsPerSection: layoutConfig.slotsPerSection,
+                    sectionCount: layout.length,
                     lastUpdated: new Date()
                 }
             });
@@ -135,7 +157,6 @@ const GarageLayout = () => {
         );
     }
 
-    // Safely check if layout exists and has sections
     const hasLayout = Array.isArray(layout) && layout.length > 0;
 
     return (
@@ -144,7 +165,7 @@ const GarageLayout = () => {
             
             {mode === 'create' ? (
                 <div className="layout-configuration">
-                    <h3> Layout settings</h3>
+                    <h3>Layout Configuration</h3>
                     <div className="config-inputs">
                         <div className="input-group">
                             <label>Number of Sections:</label>
@@ -154,21 +175,27 @@ const GarageLayout = () => {
                                 min="1"
                                 max="20"
                                 value={layoutConfig.sectionCount}
-                                onChange={handleConfigChange}
-                            />
-                        </div>
-                        <div className="input-group">
-                            <label>Slots per Section:</label>
-                            <input
-                                type="number"
-                                name="slotsPerSection"
-                                min="1"
-                                max="50"
-                                value={layoutConfig.slotsPerSection}
-                                onChange={handleConfigChange}
+                                onChange={handleSectionCountChange}
                             />
                         </div>
                     </div>
+
+                    <div className="section-slots-config">
+                        <h4>Slots per Section:</h4>
+                        {layoutConfig.sectionSlots.map((slots, index) => (
+                            <div key={index} className="input-group">
+                                <label>Section {index + 1} Slots:</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="50"
+                                    value={slots}
+                                    onChange={(e) => handleSlotCountChange(index, e.target.value)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+
                     <button 
                         onClick={generateLayout}
                         className="action-button"
@@ -191,7 +218,7 @@ const GarageLayout = () => {
                     <div className="sections-container">
                         {layout.map(section => (
                             <div key={section.id} className="section">
-                                <h4>{section.name}</h4>
+                                <h4>{section.name} ({section.slots.length} slots)</h4>
                                 <div className="slots-grid">
                                     {section.slots.map(slot => (
                                         <div
@@ -207,13 +234,15 @@ const GarageLayout = () => {
                             </div>
                         ))}
                     </div>
-                    <button 
-                        onClick={saveLayout}
-                        className="save-button"
-                        disabled={isLoading}
-                    >
-                        {isLoading ? 'Saving...' : 'Save Layout'}
-                    </button>
+                    {mode === 'create' && (
+                        <button 
+                            onClick={saveLayout}
+                            className="save-button"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Saving...' : 'Save Layout'}
+                        </button>
+                    )}
                 </div>
             )}
 

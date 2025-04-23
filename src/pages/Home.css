@@ -1,103 +1,383 @@
+
 .home-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    background-color: #1e0c3c;
+    background: linear-gradient(135deg, #28232c, #344769);
+    background-size: 200% 200%;
+    animation: gradientAnimation 10s ease infinite;
 }
 
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Glassmorphism card */
 .home-card {
-    background: rgb(144, 144, 144);
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
     width: 100%;
-    max-width: 900px;
+    max-width: 1000px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
 }
 
 .home-title {
+    color: #fff;
     text-align: center;
-    color: #162a3f;
     margin-bottom: 30px;
+    font-size: 2rem;
+    font-weight: bold;
 }
 
-.garage-settings, .garage-info {
-    background: hsl(240, 100%, 100%);
+/* Garage Info Section */
+.garage-info, .garage-settings {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
     padding: 20px;
-    border-radius: 8px;
     margin-bottom: 30px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .garage-info h3, .garage-settings h3 {
-    margin-top: 0;
-    color: #e3e3e3;
-    border-bottom: 1px solid #ddd;
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     padding-bottom: 10px;
 }
 
+.garage-photo {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.garage-photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.photo-preview {
+    width: 100%;
+    max-width: 200px;
+    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.photo-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Form Styles */
 .form-group {
-    margin-bottom: 15px;
+    position: relative;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #ffffff;
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
 }
 
 .form-group input {
     width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: #2575fc;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.form-group input[type="file"] {
     padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 16px;
+    background: transparent;
+    border: none;
 }
 
-.photo-preview, .garage-photo {
-    margin-top: 15px;
-    text-align: center;
-}
-
-.photo-preview img, .garage-photo img {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-}
-
+/* Button Styles */
 .button-group {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     margin-top: 20px;
 }
 
 .action-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
-    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
 }
 
 .action-button.primary {
-    background-color: #3498db;
-    color: white;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
 }
 
 .action-button.secondary {
-    background-color: #95a5a6;
-    color: rgb(0, 0, 0);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .action-button.primary:hover {
-    background-color: #2980b9;
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
 }
 
 .action-button.secondary:hover {
-    background-color: #7f8c8d;
+    background: rgba(255, 255, 255, 0.2);
 }
+
+/* Services Container */
+.services-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    margin: 30px 0;
+}
+
+.service-button {
+    flex: 1 1 calc(33.33% - 20px);
+    min-width: 250px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s ease;
+    color: #fff;
+    border: none;
+}
+
+.service-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.service-button h3 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.service-button p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Logout Button */
+.logout-button {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 25px;
+    color: #ff4d4d;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+    background: rgba(255, 0, 0, 0.3);
+    color: #fff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .home-card {
+        padding: 25px;
+    }
+    
+    .services-container {
+        flex-direction: column;
+    }
+    
+    .service-button {
+        flex: 1 1 100%;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .action-button {
+        width: 100%;
+    }
+}/* Home.css */
+
+/* Previous styles remain the same, add these new styles */
+
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 1rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group textarea:focus {
+    border-color: #2575fc;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.garage-info p {
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.garage-info strong {
+    color: rgba(255, 255, 255, 0.9);
+    display: inline-block;
+    min-width: 100px;
+}
+
+/* Home.css */
+
+/* Previous styles remain the same, add these new styles */
+
+/* Input with icons */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+}
+
+.input-with-icon input,
+.input-with-icon textarea {
+    padding-left: 40px !important;
+}
+
+/* File upload styling */
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-upload-label:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.upload-icon {
+    margin-right: 10px;
+    font-size: 1rem;
+}
+
+.file-input {
+    display: none;
+}
+
+/* Info icons */
+.info-icon {
+    margin-right: 10px;
+    color: #2575fc;
+}
+
+/* Service icons */
+.service-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: #6a11cb;
+}
+
+/* Logout icon */
+.logout-icon {
+    margin-right: 8px;
+}
+
+/* Placeholder styling */
+input::placeholder,
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    transition: opacity 0.3s ease;
+}
+
+input:focus::placeholder,
+textarea:focus::placeholder {
+    opacity: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .input-icon {
+        left: 10px;
+    }
+    
+    .input-with-icon input,
+    .input-with-icon textarea {
+        padding-left: 35px !important;
+    }
+    
+    .service-icon {
+        font-size: 1.5rem;
+    }
+}/* Add to your Home.css */
 
 .services-container {
     display: grid;
@@ -107,40 +387,40 @@
 }
 
 .service-button {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
     padding: 20px;
-    text-align: left;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     cursor: pointer;
-    transition: all 0.2s;
+    text-align: center;
+    transition: all 0.3s ease;
+    color: #fff;
 }
 
 .service-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-color: #3498db;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-.service-button h3 {
-    margin-top: 0;
-    color: #2c3e50;
+.service-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: #6a11cb;
 }
 
-.service-button p {
-    margin-bottom: 0;
-    color: #7f8c8d;
-}
-
-.logout-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
+/* Make sure button group is properly spaced */
+.button-group {
     margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .services-container {
+        grid-template-columns: 1fr;
+    }
 }
