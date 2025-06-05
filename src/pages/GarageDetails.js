@@ -136,7 +136,6 @@ const GarageDetails = () => {
         },
       };
 
-      // Create pictures object with numbered keys
       const picturesObject = validUrls.reduce((acc, url, index) => {
         acc[`picUrl${index + 1}`] = url;
         return acc;
@@ -190,8 +189,8 @@ const GarageDetails = () => {
               name="hourlyrate"
               value={formData.hourlyrate}
               onChange={handleChange}
-              step="0.01"
-              min="0"
+              step="5"
+              min="1"
               required
               placeholder=" "
             />
