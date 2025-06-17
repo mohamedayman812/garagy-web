@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebase';
-import './GarageLayout.css';
+import './garagelayout.css';
 
 const GarageLayout = () => {
     const navigate = useNavigate();
