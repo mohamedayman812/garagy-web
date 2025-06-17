@@ -1,0 +1,83 @@
+/* Gradient background */
+.payments-container {
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #28232c, #344769);
+  background-size: 200% 200%;
+  animation: gradientAnimation 10s ease infinite;
+  color: #fff;
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Title */
+.payments-container h2 {
+  color: #90caf9;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  text-align: center;
+  justify-content: center;
+}
+
+/* Payments list */
+.payments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Glass-style payment card */
+.payment-card {
+  background: rgba(150, 30, 30, 0.08);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.payment-card:hover {
+  transform: translateY(-3px);
+}
+
+.payment-card p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.payment-card hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 10px 0;
+}
+
+/* Icons */
+.icon {
+  margin-right: 6px;
+  color: #64b5f6;
+  vertical-align: middle;
+}
+
+/* Empty state */
+.payments-container p {
+  text-align: center;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+}

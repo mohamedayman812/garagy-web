@@ -1,0 +1,17 @@
+footer {
+  background: #121212;
+  border-top: 1px solid #2a2a2a;
+}
+
+footer a:hover {
+  color: #00aced;
+  transition: color 0.3s ease;
+}
+
+.social-icons a {
+  transition: transform 0.3s ease;
+}
+
+.social-icons a:hover {
+  transform: scale(1.2);
+}

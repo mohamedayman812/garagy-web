@@ -1,141 +1,179 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  FaUser, FaEnvelope, FaLock, FaWarehouse, FaMapMarkerAlt,
+  FaInfoCircle, FaDollarSign, FaImage, FaCheck
+} from "react-icons/fa";
+import {
+  getAuth,
+  createUserWithEmailAndPassword
+} from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  updateDoc
+} from "firebase/firestore";
 import { db } from "../firebase";
-import "./login.css";
+import "./signup.css";
 
 const SignUp = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    garageName: "",
-    garageLocation: "",
-  });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    name: "", email: "", password: "",
+    garageName: "", garageLocation: "", description: "",
+    hourlyrate: "", lat: "", lng: "",
+    photoUrls: [""]
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const updateField = (field, value) =>
+    setForm(prev => ({ ...prev, [field]: value }));
+
+  const updatePhotoUrl = (index, value) => {
+    const updated = [...form.photoUrls];
+    updated[index] = value;
+    updateField("photoUrls", updated);
   };
 
-  const handleSignUp = async (e) => {
+  const addPhotoUrlField = () => {
+    updateField("photoUrls", [...form.photoUrls, ""]);
+  };
+
+  const nextStep = () => {
+    if (step < 4) setStep(step + 1);
+  };
+  const prevStep = () => {
+    if (step > 1) setStep(step - 1);
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
     setError("");
-
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.garageName ||
-      !formData.garageLocation
-    ) {
-      setError("Please fill in all fields");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // 1. Create user account
-      console.log("Creating user account...");
       const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(
+      const { user } = await createUserWithEmailAndPassword(
         auth,
-        formData.email,
-        formData.password
+        form.email,
+        form.password
       );
-      const user = userCredential.user;
-      console.log("User created:", user.uid);
 
-      // Create admin document
-      console.log("Creating admin subdocument...");
+      const photoObj = {};
+      form.photoUrls.forEach((url, i) => {
+        if (url.trim()) {
+          photoObj[`picUrl${i + 1}`] = url.trim();
+        }
+      });
+
       await setDoc(doc(db, "admins", user.uid), {
-        name: formData.name,
-        email: formData.email,
-        type: "admin",
+        name: form.name,
+        email: form.email,
         garageId: user.uid,
-        createdAt: new Date(),
+        type: "admin",
+        createdAt: new Date()
       });
 
-      // Create garage document
       await setDoc(doc(db, "garages", user.uid), {
-        name: formData.garageName,
-        location: formData.garageLocation,
+        Information: {
+          name: form.garageName,
+          description: form.description,
+          hourlyrate: Number(form.hourlyrate),
+          pictures: photoObj
+        },
+        Location: {
+          Address: form.garageLocation,
+          Lat: form.lat,
+          Lng: form.lng
+        },
         adminId: user.uid,
-        createdAt: new Date(),
+        createdAt: new Date()
       });
 
-      // Navigate to garage details page with garage name
-      navigate("/garage-details", {
-        state: { garageName: formData.garageName },
-      });
+      navigate("/login");
     } catch (err) {
-      console.error("Signup error:", err);
-      setError(
-        err.code === "auth/email-already-in-use"
-          ? "Email already in use"
-          : err.code === "auth/invalid-email"
-          ? "Invalid email address"
-          : err.code === "auth/weak-password"
-          ? "Password should be at least 6 characters"
-          : "Failed to create account"
-      );
+      console.error("Signup failed:", err);
+      setError("Signup failed. Please check all inputs.");
+    } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2 className="login-title">Admin Sign Up</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
-        <form onSubmit={handleSignUp}>
-          {["name", "email", "password", "garageName", "garageLocation"].map(
-            (field) => (
-              <div className="form-group" key={field}>
+    <div className="signup-container">
+      <form className="signup-card" onSubmit={handleSubmit}>
+        <h2>Register Your Garage</h2>
+
+        <div className="steps-indicator">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className={`step ${step === i ? "active" : ""}`}>
+              {step > i ? <FaCheck /> : i}
+            </div>
+          ))}
+        </div>
+
+        {step === 1 && (
+          <>
+            <div className="input-group"><FaUser /><input placeholder="Full Name" value={form.name} onChange={e => updateField("name", e.target.value)} required /></div>
+            <div className="input-group"><FaEnvelope /><input placeholder="Email" type="email" value={form.email} onChange={e => updateField("email", e.target.value)} required /></div>
+            <div className="input-group"><FaLock /><input placeholder="Password" type="password" value={form.password} onChange={e => updateField("password", e.target.value)} required /></div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div className="input-group"><FaWarehouse /><input placeholder="Garage Name" value={form.garageName} onChange={e => updateField("garageName", e.target.value)} required /></div>
+            <div className="input-group"><FaMapMarkerAlt /><input placeholder="Garage Address" value={form.garageLocation} onChange={e => updateField("garageLocation", e.target.value)} required /></div>
+            <div className="input-group"><FaInfoCircle /><input placeholder="Description" value={form.description} onChange={e => updateField("description", e.target.value)} required /></div>
+            <div className="input-group"><FaDollarSign /><input placeholder="Hourly Rate" type="number" value={form.hourlyrate} onChange={e => updateField("hourlyrate", e.target.value)} required /></div>
+            <div className="input-group"><FaMapMarkerAlt /><input placeholder="Latitude" value={form.lat} onChange={e => updateField("lat", e.target.value)} required /></div>
+            <div className="input-group"><FaMapMarkerAlt /><input placeholder="Longitude" value={form.lng} onChange={e => updateField("lng", e.target.value)} required /></div>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <h4>Add Photo URLs:</h4>
+            {form.photoUrls.map((url, idx) => (
+              <div className="input-group" key={idx}>
+                <FaImage />
                 <input
-                  type={
-                    field === "password"
-                      ? "password"
-                      : field === "email"
-                      ? "email"
-                      : "text"
-                  }
-                  id={field}
-                  name={field}
-                  value={formData[field]}
-                  onChange={handleChange}
-                  required
-                  placeholder=" "
+                  placeholder={`Photo URL ${idx + 1}`}
+                  value={url}
+                  onChange={(e) => updatePhotoUrl(idx, e.target.value)}
                 />
-                <label htmlFor={field}>
-                  {field === "garageName"
-                    ? "Garage Name"
-                    : field === "garageLocation"
-                    ? "Garage Location"
-                    : field.charAt(0).toUpperCase() + field.slice(1)}
-                </label>
               </div>
-            )
-          )}
-          <button type="submit" className="login-button" disabled={isLoading}>
-            {isLoading ? "Creating Account..." : "Sign Up"}
-          </button>
-        </form>
-        <p className="text-center mt-3">
-          Already have an account?{" "}
-          <a href="/login" className="text-white">
-            Login here
-          </a>
-        </p>
-      </div>
+            ))}
+            <button type="button" onClick={addPhotoUrlField} className="add-btn">
+              + Add Another Photo URL
+            </button>
+          </>
+        )}
+
+        {step === 4 && (
+          <div className="review">
+            <h4>Review Details:</h4>
+            <p><strong>Admin:</strong> {form.name} ({form.email})</p>
+            <p><strong>Garage:</strong> {form.garageName} - {form.garageLocation}</p>
+            <p><strong>Description:</strong> {form.description}</p>
+            <p><strong>Rate:</strong> ${form.hourlyrate}</p>
+            <p><strong>Lat/Lng:</strong> {form.lat}, {form.lng}</p>
+            <p><strong>Photos:</strong> {form.photoUrls.length}</p>
+          </div>
+        )}
+
+        {error && <div className="error">{error}</div>}
+
+        <div className="buttons">
+          {step > 1 && <button type="button" onClick={prevStep}>Back</button>}
+          {step < 4 && <button type="button" onClick={nextStep}>Next</button>}
+          {step === 4 && <button type="submit" disabled={isLoading}>
+            {isLoading ? "Submitting..." : "Submit"}
+          </button>}
+        </div>
+      </form>
     </div>
   );
 };

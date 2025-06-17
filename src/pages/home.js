@@ -4,10 +4,10 @@ import { getAuth } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
-import { 
-  FaUser, FaWarehouse, FaMapMarkerAlt, FaDollarSign, 
-  FaAlignLeft, FaFileUpload, FaChartBar, FaUsers, 
-  FaParking, FaSignOutAlt, FaCreditCard 
+import {
+  FaUser, FaWarehouse, FaMapMarkerAlt, FaDollarSign,
+  FaAlignLeft, FaFileUpload, FaChartBar, FaUsers,
+  FaParking, FaSignOutAlt, FaCreditCard
 } from 'react-icons/fa';
 import './Home.css';
 
@@ -20,44 +20,56 @@ const Home = () => {
     garageName: '',
     garageLocation: '',
     hourlyPrice: '',
-    description: ''
+    description: '',
   });
   const [garagePhoto, setGaragePhoto] = useState(null);
   const [photoURL, setPhotoURL] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAdminData = async () => {
+    const fetchData = async () => {
       const auth = getAuth();
       const user = auth.currentUser;
-      
       if (!user) {
-        navigate('/login');
+        navigate("/login");
         return;
       }
 
       try {
-        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-        if (adminDoc.exists()) {
-          const data = adminDoc.data();
-          setAdminData(data);
-          setFormData({
-            name: data.name || '',
-            garageName: data.garage?.name || '',
-            garageLocation: data.garage?.location || '',
-            hourlyPrice: data.garage?.hourlyPrice || '',
-            description: data.garage?.description || ''
-          });
-          setPhotoURL(data.garage?.photoURL || '');
+        const adminRef = doc(db, "admins", user.uid);
+        const adminSnap = await getDoc(adminRef);
+        if (adminSnap.exists()) {
+          const admin = adminSnap.data();
+          setAdminData(admin);
+
+          const garageId = admin.garageId;
+          const garageRef = doc(db, "garages", garageId);
+          const garageSnap = await getDoc(garageRef);
+
+          if (garageSnap.exists()) {
+            const garage = garageSnap.data();
+            const info = garage.Information || {};
+            const location = garage.Location || {};
+
+            setFormData({
+              name: admin.name || '',
+              garageName: info.name || '',
+              garageLocation: location.Address || '',
+              hourlyPrice: info.hourlyrate || '',
+              description: info.description || ''
+            });
+
+            setPhotoURL(info.pictures?.picUrl1 || '');
+          }
         }
-      } catch (error) {
-        console.error('Error fetching admin data:', error);
+      } catch (err) {
+        console.error("Failed to fetch dashboard info:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchAdminData();
+    fetchData();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -66,80 +78,66 @@ const Home = () => {
     navigate('/login');
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handlePhotoChange = (e) => {
     if (e.target.files[0]) {
       setGaragePhoto(e.target.files[0]);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const saveGarageSettings = async () => {
     const auth = getAuth();
     const user = auth.currentUser;
-    
     if (!user || !adminData) return;
 
     setIsLoading(true);
     try {
-      let newPhotoURL = photoURL;
-      
+      let uploadedPhotoUrl = photoURL;
+
       if (garagePhoto) {
-        const photoRef = ref(storage, `garage_photos/${user.uid}`);
+        const photoRef = ref(storage, `garage_photos/${user.uid}/main.jpg`);
         await uploadBytes(photoRef, garagePhoto);
-        newPhotoURL = await getDownloadURL(photoRef);
-        setPhotoURL(newPhotoURL);
+        uploadedPhotoUrl = await getDownloadURL(photoRef);
       }
 
-      const garageData = {
-        name: formData.garageName,
-        location: formData.garageLocation,
-        photoURL: newPhotoURL,
-        hourlyPrice: formData.hourlyPrice,
-        description: formData.description
-      };
-
-      await updateDoc(doc(db, 'admins', user.uid), {
-        name: formData.name,
-        garage: garageData
+      // Update admin name
+      await updateDoc(doc(db, "admins", user.uid), {
+        name: formData.name
       });
 
-      if (adminData.garageId) {
-        await updateDoc(doc(db, 'garages', adminData.garageId), garageData);
-      }
-
-      setIsEditing(false);
-      setAdminData(prev => ({
-        ...prev,
-        name: formData.name,
-        garage: {
-          ...prev.garage,
-          ...garageData
+      // Update garage data
+      const garageRef = doc(db, "garages", adminData.garageId);
+      await updateDoc(garageRef, {
+        Information: {
+          name: formData.garageName,
+          description: formData.description,
+          hourlyrate: Number(formData.hourlyPrice),
+          pictures: { picUrl1: uploadedPhotoUrl }
+        },
+        Location: {
+          Address: formData.garageLocation
         }
-      }));
-    } catch (error) {
-      console.error('Error updating garage settings:', error);
+      });
+
+      setPhotoURL(uploadedPhotoUrl);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Failed to update garage:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const navigateToService = (service) => {
-    navigate(`/${service}`);
-  };
+  const navigateToService = (route) => navigate(`/${route}`);
 
   if (isLoading) {
     return (
       <div className="home-container">
-        <div className="home-card">
-          <h2>Loading Dashboard...</h2>
-        </div>
+        <div className="home-card"><h2>Loading Dashboard...</h2></div>
       </div>
     );
   }
@@ -152,84 +150,47 @@ const Home = () => {
         {isEditing ? (
           <div className="garage-settings">
             <h3>Update Garage Settings</h3>
-            
+
             <div className="form-group">
               <div className="input-with-icon">
                 <FaUser className="input-icon" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Admin Name"
-                />
+                <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Admin Name" />
               </div>
             </div>
-            
+
             <div className="form-group">
               <div className="input-with-icon">
                 <FaWarehouse className="input-icon" />
-                <input
-                  type="text"
-                  name="garageName"
-                  value={formData.garageName}
-                  onChange={handleInputChange}
-                  placeholder="Garage Name"
-                />
+                <input type="text" name="garageName" value={formData.garageName} onChange={handleInputChange} placeholder="Garage Name" />
               </div>
             </div>
-            
+
             <div className="form-group">
               <div className="input-with-icon">
                 <FaMapMarkerAlt className="input-icon" />
-                <input
-                  type="text"
-                  name="garageLocation"
-                  value={formData.garageLocation}
-                  onChange={handleInputChange}
-                  placeholder="Garage Location"
-                />
+                <input type="text" name="garageLocation" value={formData.garageLocation} onChange={handleInputChange} placeholder="Garage Location" />
               </div>
             </div>
 
             <div className="form-group">
               <div className="input-with-icon">
                 <FaDollarSign className="input-icon" />
-                <input
-                  type="number"
-                  name="hourlyPrice"
-                  value={formData.hourlyPrice}
-                  onChange={handleInputChange}
-                  placeholder="Hourly Price ($)"
-                  min="0"
-                  step="0.01"
-                />
+                <input type="number" name="hourlyPrice" value={formData.hourlyPrice} onChange={handleInputChange} placeholder="Hourly Price" />
               </div>
             </div>
 
             <div className="form-group">
               <div className="input-with-icon">
                 <FaAlignLeft className="input-icon" />
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Description"
-                  rows="3"
-                />
+                <textarea name="description" rows="3" value={formData.description} onChange={handleInputChange} placeholder="Description" />
               </div>
             </div>
-            
+
             <div className="form-group">
               <label className="file-upload-label">
                 <FaFileUpload className="upload-icon" />
                 <span>{garagePhoto ? garagePhoto.name : 'Choose Garage Photo'}</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="file-input"
-                />
+                <input type="file" accept="image/*" onChange={handlePhotoChange} className="file-input" />
               </label>
               {photoURL && (
                 <div className="photo-preview">
@@ -237,19 +198,12 @@ const Home = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="button-group">
-              <button 
-                onClick={saveGarageSettings}
-                className="action-button primary"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Saving...' : 'Save Changes'}
+              <button onClick={saveGarageSettings} className="action-button primary" disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Changes"}
               </button>
-              <button 
-                onClick={() => setIsEditing(false)}
-                className="action-button secondary"
-              >
+              <button onClick={() => setIsEditing(false)} className="action-button secondary">
                 Cancel
               </button>
             </div>
@@ -262,49 +216,35 @@ const Home = () => {
                 <img src={photoURL} alt="Garage" />
               </div>
             )}
-            <p><FaUser className="info-icon" /> <strong>Admin:</strong> {adminData?.name}</p>
-            <p><FaWarehouse className="info-icon" /> <strong>Garage:</strong> {adminData?.garage?.name}</p>
-            <p><FaMapMarkerAlt className="info-icon" /> <strong>Location:</strong> {adminData?.garage?.location}</p>
-            <p><FaDollarSign className="info-icon" /> <strong>Hourly Price:</strong> ${adminData?.garage?.hourlyPrice || 'Not set'}</p>
-            <p><FaAlignLeft className="info-icon" /> <strong>Description:</strong> {adminData?.garage?.description || 'No description provided'}</p>
-            <button 
-              onClick={() => setIsEditing(true)}
-              className="action-button primary"
-            >
+            <p><FaUser className="info-icon" /> <strong>Admin:</strong> {formData.name}</p>
+            <p><FaWarehouse className="info-icon" /> <strong>Garage:</strong> {formData.garageName}</p>
+            <p><FaMapMarkerAlt className="info-icon" /> <strong>Location:</strong> {formData.garageLocation}</p>
+            <p><FaDollarSign className="info-icon" /> <strong>Hourly Price:</strong> ${formData.hourlyPrice}</p>
+            <p><FaAlignLeft className="info-icon" /> <strong>Description:</strong> {formData.description}</p>
+
+            <button onClick={() => setIsEditing(true)} className="action-button primary">
               Update Garage Settings
             </button>
           </div>
         )}
 
         <div className="services-container">
-          <button className="service-button" onClick={() => navigateToService('reports')}>
-            <FaChartBar className="service-icon" />
-            <h3>Reports</h3>
-            <p>View and reply to user reports</p>
+          <button className="service-button" onClick={() => navigateToService("reports")}>
+            <FaChartBar className="service-icon" /><h3>Reports</h3><p>View and reply to user reports</p>
           </button>
-
-          <button className="service-button" onClick={() => navigateToService('user-tracking')}>
-            <FaUsers className="service-icon" />
-            <h3>User Tracking</h3>
-            <p>Track user activity and parking records</p>
+          <button className="service-button" onClick={() => navigateToService("user-tracking")}>
+            <FaUsers className="service-icon" /><h3>User Tracking</h3><p>Track user activity</p>
           </button>
-
-          <button className="service-button" onClick={() => navigateToService('garage-layout')}>
-            <FaParking className="service-icon" />
-            <h3>Garage Layout</h3>
-            <p>View and update the garage layout</p>
+          <button className="service-button" onClick={() => navigateToService("garage-layout")}>
+            <FaParking className="service-icon" /><h3>Garage Layout</h3><p>Manage your space</p>
           </button>
-
-          <button className="service-button" onClick={() => navigateToService('payments')}>
-            <FaCreditCard className="service-icon" />
-            <h3>Payments</h3>
-            <p>Manage payment methods and transactions</p>
+          <button className="service-button" onClick={() => navigateToService("payments")}>
+            <FaCreditCard className="service-icon" /><h3>Payments</h3><p>See paid transactions</p>
           </button>
         </div>
 
         <button onClick={handleLogout} className="logout-button">
-          <FaSignOutAlt className="logout-icon" />
-          Logout
+          <FaSignOutAlt className="logout-icon" /> Logout
         </button>
       </div>
     </div>

@@ -1,0 +1,77 @@
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  background: #292b36;
+}
+.signup-card {
+  background: #1d1e27;
+  padding: 30px;
+  border-radius: 12px;
+  width: 550px;
+  color: #fff;
+}
+.signup-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.steps-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.step {
+  width: 30px;
+  height: 30px;
+  background: #44465a;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.step.active {
+  background: #4caf50;
+}
+.input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.input-group input {
+  flex: 1;
+  padding: 8px;
+  margin-left: 8px;
+  background: #2e2f39;
+  border: none;
+  color: #fff;
+  border-radius: 5px;
+}
+.input-group.file input {
+  margin-left: 8px;
+}
+.review p {
+  margin: 8px 0;
+}
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+.buttons button {
+  
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  border: none;
+  padding: 8px 15px;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.buttons button:disabled {
+  opacity: 0.6;
+}
+.error {
+  background: #c62828;
+  padding: 8px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}

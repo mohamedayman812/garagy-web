@@ -15,6 +15,7 @@ import Reports from "./pages/Reports";
 import UserTracking from "./pages/UserTracking";
 import GarageLayout from "./pages/GarageLayout";
 import GarageDetails from "./pages/GarageDetails";
+import Payments from "./pages/payments"; // ✅ NEW
 import ProtectedRoute from "./components/protectedroute";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
@@ -67,6 +68,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <GarageLayout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payments" // ✅ NEW route
+              element={
+                <ProtectedRoute>
+                  <Payments />
                 </ProtectedRoute>
               }
             />
