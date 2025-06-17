@@ -1,0 +1,281 @@
+/* UserTracking.css */
+
+/* -------------------------------------------- */
+/* CONTAINER + BACKGROUND                        */
+/* -------------------------------------------- */
+
+.user-tracking-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #28232c, #344769);
+  background-size: 200% 200%;
+  animation: gradientAnimation 10s ease infinite;
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* -------------------------------------------- */
+/* FADE-IN + SLIDE-UP ANIMATIONS                */
+/* -------------------------------------------- */
+
+@keyframes fadeInCard {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes titleFadeIn {
+  0% {
+    opacity: 0;
+    letter-spacing: 10px;
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 2px;
+  }
+}
+
+@keyframes spinIcon {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* -------------------------------------------- */
+/* LOADING CARD                                  */
+/* -------------------------------------------- */
+
+.loading-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  width: 280px;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInCard 0.8s ease-out forwards;
+}
+
+.spinner-icon {
+  font-size: 2rem;
+  animation: spinIcon 1s linear infinite;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.loading-text {
+  font-size: 1.2rem;
+}
+
+/* -------------------------------------------- */
+/* MAIN TRACKING CARD                             */
+/* -------------------------------------------- */
+
+.user-tracking-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  width: 100%;
+  max-width: 900px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInCard 0.8s ease-out forwards;
+}
+
+.tracking-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 2rem;
+  margin-bottom: 25px;
+  opacity: 0;
+  animation: titleFadeIn 1s ease-out forwards;
+}
+
+.animate-title {
+  animation-delay: 0.3s;
+}
+
+.users-icon {
+  margin-right: 10px;
+  color: #6a11cb;
+}
+
+/* -------------------------------------------- */
+/* NO-USERS TEXT                                  */
+/* -------------------------------------------- */
+
+.no-users-text {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin-top: 20px;
+}
+
+/* -------------------------------------------- */
+/* USERS GRID + CARD STYLING                     */
+/* -------------------------------------------- */
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.user-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+
+
+.user-name {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.user-email,
+.user-phone,
+.user-meta,
+.user-wallet,
+.user-cards,
+.user-setting,
+.user-created {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.profile-picture {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-top: 5px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 10px 0;
+}
+
+.notification-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 5px 0 0 0;
+}
+
+.notification-list li {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.notification-list li .icon-tick {
+  margin-left: 5px;
+  color: #4caf50;
+}
+
+.notification-list li svg {
+  margin-right: 6px;
+}
+
+.user-vehicles {
+  margin-top: 10px;
+}
+
+.vehicles-title {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.no-vehicles-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.vehicle-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.vehicle-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Icon styling */
+.icon-small {
+  margin-right: 6px;
+  color: #2575fc;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+/* -------------------------------------------- */
+/* RESPONSIVE ADJUSTMENTS                         */
+/* -------------------------------------------- */
+
+@media (max-width: 768px) {
+  .user-tracking-card {
+    padding: 20px;
+  }
+  .users-grid {
+    grid-template-columns: 1fr;
+  }
+}
