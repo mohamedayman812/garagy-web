@@ -7,7 +7,7 @@ import { db, storage } from '../firebase';
 import {
   FaUser, FaWarehouse, FaMapMarkerAlt, FaDollarSign,
   FaAlignLeft, FaFileUpload, FaChartBar, FaUsers,
-  FaParking, FaSignOutAlt, FaCreditCard
+  FaParking, FaSignOutAlt, FaCreditCard, FaComments
 } from 'react-icons/fa';
 import './Home.css';
 
@@ -104,12 +104,10 @@ const Home = () => {
         uploadedPhotoUrl = await getDownloadURL(photoRef);
       }
 
-      // Update admin name
       await updateDoc(doc(db, "admins", user.uid), {
         name: formData.name
       });
 
-      // Update garage data
       const garageRef = doc(db, "garages", adminData.garageId);
       await updateDoc(garageRef, {
         Information: {
@@ -136,116 +134,247 @@ const Home = () => {
 
   if (isLoading) {
     return (
-      <div className="home-container">
-        <div className="home-card"><h2>Loading Dashboard...</h2></div>
+      <div className="dashboard-wrapper">
+        <div className="creative-container">
+          <div className="glass-card" style={{ textAlign: 'center', padding: '3rem' }}>
+            <div className="loading-spinner" style={{ marginBottom: '1rem' }}></div>
+            <h2 style={{ color: '#fff', margin: 0 }}>Loading Dashboard...</h2>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="home-container">
-      <div className="home-card">
-        <h2 className="home-title">Admin Dashboard</h2>
+    <div className="dashboard-wrapper">
+      <div className="creative-container">
+        <h1 className="creative-title animate-fade-in-up">Admin Dashboard</h1>
 
         {isEditing ? (
-          <div className="garage-settings">
-            <h3>Update Garage Settings</h3>
+          <div className="glass-card animate-fade-in-up animate-delay-1" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
+            <h2 style={{ color: '#fff', marginBottom: '2rem', fontSize: '1.75rem', textAlign: 'center' }}>
+              Update Garage Settings
+            </h2>
 
-            <div className="form-group">
-              <div className="input-with-icon">
-                <FaUser className="input-icon" />
-                <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Admin Name" />
+            <div className="modern-input-group">
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Admin Name"
+                className="modern-input"
+              />
+              <div className="floating-label">
+                <FaUser style={{ marginRight: '0.5rem' }} />
+                Admin Name
               </div>
             </div>
 
-            <div className="form-group">
-              <div className="input-with-icon">
-                <FaWarehouse className="input-icon" />
-                <input type="text" name="garageName" value={formData.garageName} onChange={handleInputChange} placeholder="Garage Name" />
+            <div className="modern-input-group">
+              <input
+                type="text"
+                name="garageName"
+                value={formData.garageName}
+                onChange={handleInputChange}
+                placeholder="Garage Name"
+                className="modern-input"
+              />
+              <div className="floating-label">
+                <FaWarehouse style={{ marginRight: '0.5rem' }} />
+                Garage Name
               </div>
             </div>
 
-            <div className="form-group">
-              <div className="input-with-icon">
-                <FaMapMarkerAlt className="input-icon" />
-                <input type="text" name="garageLocation" value={formData.garageLocation} onChange={handleInputChange} placeholder="Garage Location" />
+            <div className="modern-input-group">
+              <input
+                type="text"
+                name="garageLocation"
+                value={formData.garageLocation}
+                onChange={handleInputChange}
+                placeholder="Garage Location"
+                className="modern-input"
+              />
+              <div className="floating-label">
+                <FaMapMarkerAlt style={{ marginRight: '0.5rem' }} />
+                Location
               </div>
             </div>
 
-            <div className="form-group">
-              <div className="input-with-icon">
-                <FaDollarSign className="input-icon" />
-                <input type="number" name="hourlyPrice" value={formData.hourlyPrice} onChange={handleInputChange} placeholder="Hourly Price" />
+            <div className="modern-input-group">
+              <input
+                type="number"
+                name="hourlyPrice"
+                value={formData.hourlyPrice}
+                onChange={handleInputChange}
+                placeholder="Hourly Price"
+                className="modern-input"
+              />
+              <div className="floating-label">
+                <FaDollarSign style={{ marginRight: '0.5rem' }} />
+                Hourly Price
               </div>
             </div>
 
-            <div className="form-group">
-              <div className="input-with-icon">
-                <FaAlignLeft className="input-icon" />
-                <textarea name="description" rows="3" value={formData.description} onChange={handleInputChange} placeholder="Description" />
+            <div className="modern-input-group">
+              <textarea
+                name="description"
+                rows="4"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Description"
+                className="modern-input"
+                style={{ resize: 'vertical', minHeight: '120px' }}
+              />
+              <div className="floating-label">
+                <FaAlignLeft style={{ marginRight: '0.5rem' }} />
+                Description
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="file-upload-label">
-                <FaFileUpload className="upload-icon" />
-                <span>{garagePhoto ? garagePhoto.name : 'Choose Garage Photo'}</span>
-                <input type="file" accept="image/*" onChange={handlePhotoChange} className="file-input" />
+            <div className="modern-input-group">
+              <label className="creative-btn btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}>
+                <FaFileUpload style={{ marginRight: '0.5rem' }} />
+                {garagePhoto ? garagePhoto.name : 'Choose Garage Photo'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  style={{ display: 'none' }}
+                />
               </label>
               {photoURL && (
                 <div className="photo-preview">
-                  <img src={photoURL} alt="Garage Preview" />
+                  <img src={photoURL || "/placeholder.svg"} alt="Garage Preview" />
                 </div>
               )}
             </div>
 
-            <div className="button-group">
-              <button onClick={saveGarageSettings} className="action-button primary" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Changes"}
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
+              <button
+                onClick={saveGarageSettings}
+                className="creative-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <div className="loading-spinner" style={{ marginRight: '0.5rem' }}></div>
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
               </button>
-              <button onClick={() => setIsEditing(false)} className="action-button secondary">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="creative-btn btn-secondary"
+              >
                 Cancel
               </button>
             </div>
           </div>
         ) : (
-          <div className="garage-info">
-            <h3>Garage Information</h3>
+          <div className="glass-card animate-fade-in-up animate-delay-1" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
+            <h2 style={{ color: '#fff', marginBottom: '2rem', fontSize: '1.75rem', textAlign: 'center' }}>
+              Garage Information
+            </h2>
+            
             {photoURL && (
-              <div className="garage-photo">
-                <img src={photoURL} alt="Garage" />
+              <div className="photo-preview" style={{ marginBottom: '2rem' }}>
+                <img src={photoURL || "/placeholder.svg"} alt="Garage" />
               </div>
             )}
-            <p><FaUser className="info-icon" /> <strong>Admin:</strong> {formData.name}</p>
-            <p><FaWarehouse className="info-icon" /> <strong>Garage:</strong> {formData.garageName}</p>
-            <p><FaMapMarkerAlt className="info-icon" /> <strong>Location:</strong> {formData.garageLocation}</p>
-            <p><FaDollarSign className="info-icon" /> <strong>Hourly Price:</strong> ${formData.hourlyPrice}</p>
-            <p><FaAlignLeft className="info-icon" /> <strong>Description:</strong> {formData.description}</p>
 
-            <button onClick={() => setIsEditing(true)} className="action-button primary">
-              Update Garage Settings
-            </button>
+            <div className="info-grid">
+              <div className="info-card">
+                <div className="info-label">
+                  <FaUser style={{ marginRight: '0.5rem' }} />
+                  Admin
+                </div>
+                <div className="info-value">{formData.name}</div>
+              </div>
+              <div className="info-card">
+                <div className="info-label">
+                  <FaWarehouse style={{ marginRight: '0.5rem' }} />
+                  Garage
+                </div>
+                <div className="info-value">{formData.garageName}</div>
+              </div>
+              <div className="info-card">
+                <div className="info-label">
+                  <FaMapMarkerAlt style={{ marginRight: '0.5rem' }} />
+                  Location
+                </div>
+                <div className="info-value">{formData.garageLocation}</div>
+              </div>
+              <div className="info-card">
+                <div className="info-label">
+                  <FaDollarSign style={{ marginRight: '0.5rem' }} />
+                  Hourly Price
+                </div>
+                <div className="info-value">${formData.hourlyPrice}</div>
+              </div>
+            </div>
+
+            <div className="info-card" style={{ marginBottom: '2rem' }}>
+              <div className="info-label">
+                <FaAlignLeft style={{ marginRight: '0.5rem' }} />
+                Description
+              </div>
+              <div className="info-value" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
+                {formData.description}
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <button onClick={() => setIsEditing(true)} className="creative-btn">
+                Update Garage Settings
+              </button>
+            </div>
           </div>
         )}
 
-        <div className="services-container">
-          <button className="service-button" onClick={() => navigateToService("reports")}>
-            <FaChartBar className="service-icon" /><h3>Reports</h3><p>View and reply to user reports</p>
-          </button>
-          <button className="service-button" onClick={() => navigateToService("user-tracking")}>
-            <FaUsers className="service-icon" /><h3>User Tracking</h3><p>Track user activity</p>
-          </button>
-          <button className="service-button" onClick={() => navigateToService("garage-layout")}>
-            <FaParking className="service-icon" /><h3>Garage Layout</h3><p>Manage your space</p>
-          </button>
-          <button className="service-button" onClick={() => navigateToService("payments")}>
-            <FaCreditCard className="service-icon" /><h3>Payments</h3><p>See paid transactions</p>
-          </button>
+        <div className="services-grid">
+          <div className="service-card animate-fade-in-up animate-delay-2" onClick={() => navigateToService("reports")}>
+            <FaChartBar className="service-icon" />
+            <h3 className="service-title">Reports</h3>
+            <p className="service-description">View and reply to user reports</p>
+          </div>
+          
+          <div className="service-card animate-fade-in-up animate-delay-3" onClick={() => navigateToService("user-tracking")}>
+            <FaUsers className="service-icon" />
+            <h3 className="service-title">User Tracking</h3>
+            <p className="service-description">Track user activity and analytics</p>
+          </div>
+          
+          <div className="service-card animate-fade-in-up animate-delay-4" onClick={() => navigateToService("garage-layout")}>
+            <FaParking className="service-icon" />
+            <h3 className="service-title">Garage Layout</h3>
+            <p className="service-description">Manage your parking space layout</p>
+          </div>
+          
+          <div className="service-card animate-fade-in-up animate-delay-1" onClick={() => navigateToService("payments")}>
+            <FaCreditCard className="service-icon" />
+            <h3 className="service-title">Payments</h3>
+            <p className="service-description">View paid transactions and revenue</p>
+          </div>
+          
+          <div className="service-card animate-fade-in-up animate-delay-2" onClick={() => navigateToService("reviews")}>
+            <FaComments className="service-icon" />
+            <h3 className="service-title">Reviews</h3>
+            <p className="service-description">Read customer feedback and reviews</p>
+          </div>
         </div>
 
-        <button onClick={handleLogout} className="logout-button">
-          <FaSignOutAlt className="logout-icon" /> Logout
-        </button>
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <button onClick={handleLogout} className="creative-btn" style={{ 
+            background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+            boxShadow: '0 4px 15px rgba(255, 107, 107, 0.4)'
+          }}>
+            <FaSignOutAlt style={{ marginRight: '0.5rem' }} />
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   );

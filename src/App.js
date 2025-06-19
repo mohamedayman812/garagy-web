@@ -5,6 +5,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
+
 import Navbar from "./components/navbar";
 import Footer from "./components/footer";
 import Home from "./pages/home";
@@ -15,7 +16,10 @@ import Reports from "./pages/Reports";
 import UserTracking from "./pages/UserTracking";
 import GarageLayout from "./pages/GarageLayout";
 import GarageDetails from "./pages/GarageDetails";
-import Payments from "./pages/payments"; // ✅ NEW
+import Payments from "./pages/payments";
+import Reviews from "./pages/reviews";
+import Statistics from "./pages/Statistics"; // ✅ NEW
+
 import ProtectedRoute from "./components/protectedroute";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
@@ -72,10 +76,26 @@ function App() {
               }
             />
             <Route
-              path="/payments" // ✅ NEW route
+              path="/payments"
               element={
                 <ProtectedRoute>
                   <Payments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reviews"
+              element={
+                <ProtectedRoute>
+                  <Reviews />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/statistics" 
+              element={
+                <ProtectedRoute>
+                  <Statistics />
                 </ProtectedRoute>
               }
             />

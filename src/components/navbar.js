@@ -1,46 +1,113 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+"use client";
+
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  FaHome,
+  FaUser,
+  FaSignOutAlt,
+  FaSignInAlt,
+  FaParking,
+  FaChartBar,
+  FaChartLine,
+  FaUsers,
+  FaCreditCard,
+  FaComments,
+} from "react-icons/fa";
+import "./navbar.css";
 
 const Navbar = () => {
-    const navigate = useNavigate();
-    const isLoggedIn = localStorage.getItem('isLoggedIn'); // Check if admin is logged in
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [adminData, setAdminData] = useState(null);
 
-    const handleLogout = () => {
-        localStorage.removeItem('isLoggedIn'); // Clear login status
-        navigate('/'); // Redirect to login page
-    };
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsLoggedIn(true);
+        setAdminData({
+          name: user.displayName || "Admin",
+          email: user.email,
+        });
+      } else {
+        setIsLoggedIn(false);
+        setAdminData(null);
+        localStorage.removeItem("adminData");
+      }
+    });
 
-    return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div className="container-fluid">
-                <Link className="navbar-brand" to="/">Garagy Parking Management</Link>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-                <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav ms-auto">
-                        {isLoggedIn ? (
-                            <>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/home">Home</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className="nav-link" to="/admin">Admin</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <button className="btn btn-outline-light" onClick={handleLogout}>Logout</button>
-                                </li>
-                            </>
-                        ) : (
-                            <li className="nav-item">
-                                <Link className="nav-link" to="/">Login</Link>
-                            </li>
-                        )}
-                    </ul>
-                </div>
-            </div>
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  const isActive = (path) => location.pathname === path;
+
+  const navItems = [
+    { path: "/home", label: "Dashboard", icon: FaHome },
+    { path: "/garage-layout", label: "Layout", icon: FaParking },
+    { path: "/statistics", label: "Statistics", icon: FaChartLine },
+    { path: "/reports", label: "Reports", icon: FaChartBar },
+    { path: "/user-tracking", label: "Users", icon: FaUsers },
+    { path: "/payments", label: "Payments", icon: FaCreditCard },
+    { path: "/reviews", label: "Reviews", icon: FaComments },
+    { path: "/profile", label: "Profile", icon: FaUser },
+  ];
+
+  return (
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <div className="brand-icon">🅿️</div>
+        <span className="brand-text">Garagy</span>
+      </div>
+
+      {isLoggedIn && (
+        <nav className="sidebar-nav">
+          {navItems.map(({ path, label, icon: Icon }) => (
+            <Link
+              key={path}
+              to={path}
+              className={`sidebar-link ${isActive(path) ? "active" : ""}`}
+            >
+              <Icon className="sidebar-icon" />
+              <span>{label}</span>
+            </Link>
+          ))}
         </nav>
-    );
+      )}
+
+      <div className="sidebar-footer">
+        {isLoggedIn ? (
+          <>
+            <div className="admin-info">
+              <div className="admin-avatar">
+                {adminData?.name?.charAt(0) || "A"}
+              </div>
+              <div>
+                <div className="admin-name">{adminData?.name}</div>
+                <div className="admin-role">Administrator</div>
+              </div>
+            </div>
+            <button className="logout-button" onClick={handleLogout}>
+              <FaSignOutAlt /> Logout
+            </button>
+          </>
+        ) : (
+          <Link to="/login" className="login-link">
+            <FaSignInAlt /> Login
+          </Link>
+        )}
+      </div>
+    </aside>
+  );
 };
 
 export default Navbar;
