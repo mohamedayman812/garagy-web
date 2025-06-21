@@ -1,0 +1,37 @@
+.car-scanner-container {
+  padding: 2rem;
+  color: #fff;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  min-height: 100vh;
+  text-align: center;
+}
+
+input[type="file"] {
+  margin: 1rem 0;
+}
+
+.preview {
+  margin: 1rem 0;
+}
+
+button {
+  background: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.result-box {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.error-box {
+  margin-top: 1rem;
+  color: #f44336;
+}

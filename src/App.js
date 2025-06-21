@@ -19,7 +19,7 @@ import GarageDetails from "./pages/GarageDetails";
 import Payments from "./pages/payments";
 import Reviews from "./pages/reviews";
 import Statistics from "./pages/Statistics"; // ✅ NEW
-
+import CarScanner from "./pages/CarScanner"
 import ProtectedRoute from "./components/protectedroute";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
@@ -51,6 +51,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+  path="/scan-car"
+  element={
+    <ProtectedRoute>
+      <CarScanner />
+    </ProtectedRoute>
+  }
+/>
             <Route
               path="/reports"
               element={

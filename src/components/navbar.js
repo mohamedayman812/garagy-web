@@ -14,6 +14,7 @@ import {
   FaUsers,
   FaCreditCard,
   FaComments,
+  FaCamera, // ✅ Added for Car Scanner
 } from "react-icons/fa";
 import "./navbar.css";
 
@@ -59,6 +60,7 @@ const Navbar = () => {
     { path: "/user-tracking", label: "Users", icon: FaUsers },
     { path: "/payments", label: "Payments", icon: FaCreditCard },
     { path: "/reviews", label: "Reviews", icon: FaComments },
+    { path: "/scan-car", label: "Car Scanner", icon: FaCamera }, // ✅ New nav item
     { path: "/profile", label: "Profile", icon: FaUser },
   ];
 
