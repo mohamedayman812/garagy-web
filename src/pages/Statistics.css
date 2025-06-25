@@ -1,10 +1,13 @@
-/* Modern Creative Statistics Styles */
 .statistics-container {
-  min-height: 100vh;
   padding: 2rem;
-  background: linear-gradient(135deg, #292d3d 0%, #764ba2 100%);
-  position: relative;
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .statistics-container::before {
@@ -21,8 +24,7 @@
 }
 
 @keyframes float {
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0px) rotate(0deg);
   }
   33% {
@@ -33,7 +35,6 @@
   }
 }
 
-/* Loading State */
 .loading-card {
   display: flex;
   flex-direction: column;
@@ -62,7 +63,6 @@
   }
 }
 
-/* Header */
 .statistics-header {
   text-align: center;
   margin-bottom: 3rem;
@@ -106,11 +106,12 @@
   margin: 0;
 }
 
-/* Metrics Grid */
+/* ✅ Fixed Layout: Metrics Grid */
 .metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
+  justify-content: center;
   margin-bottom: 3rem;
   position: relative;
   z-index: 1;
@@ -127,6 +128,9 @@
   position: relative;
   overflow: hidden;
   animation: slideInUp 0.6s ease-out forwards;
+  flex: 1 1 250px;
+  min-width: 250px;
+  max-width: 300px;
 }
 
 @keyframes slideInUp {
@@ -259,7 +263,6 @@
   position: relative;
 }
 
-/* Bar Chart */
 .bar-chart {
   display: flex;
   align-items: end;
@@ -319,7 +322,6 @@
   white-space: nowrap;
 }
 
-/* Line Chart */
 .line-chart {
   display: flex;
   align-items: end;
@@ -380,142 +382,6 @@
   text-align: center;
 }
 
-/* Details Section */
-.details-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 2rem;
-  position: relative;
-  z-index: 1;
-}
-
-.details-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.details-title {
-  color: #fff;
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-}
-
-/* Payment Methods */
-.payment-methods {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.payment-method {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.method-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.method-name {
-  color: #fff;
-  font-weight: 600;
-}
-
-.method-amount {
-  color: #4caf50;
-  font-weight: 700;
-}
-
-.method-bar {
-  height: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.method-progress {
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.method-percentage {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.85rem;
-  text-align: right;
-}
-
-/* Transactions List */
-.transactions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.transaction-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.transaction-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(4px);
-}
-
-.transaction-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.transaction-amount {
-  color: #4caf50;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-.transaction-details {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.transaction-method {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.85rem;
-}
-
-.transaction-duration {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8rem;
-}
-
-.transaction-date {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.85rem;
-  text-align: right;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .statistics-container {
@@ -529,34 +395,16 @@
   }
 
   .metrics-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    flex-direction: column;
+    align-items: center;
   }
 
   .charts-section {
     grid-template-columns: 1fr;
   }
 
-  .details-section {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-container {
-    height: 250px;
-  }
-
   .bar-label {
     transform: none;
     font-size: 0.7rem;
-  }
-
-  .transaction-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .transaction-date {
-    text-align: left;
   }
 }

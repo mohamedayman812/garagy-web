@@ -14,8 +14,18 @@ input[type="file"] {
   margin: 1rem 0;
 }
 
+/* Make the image larger */
+.preview img {
+  max-width: 100%;
+  width: 400px;       /* adjust as needed */
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  margin-top: 1rem;
+}
+
 button {
-  background: #4caf50;
+  background: #241353;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -28,10 +38,29 @@ button {
   font-size: 1.2rem;
   background: rgba(255, 255, 255, 0.1);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 20px;
 }
 
 .error-box {
   margin-top: 1rem;
   color: #f44336;
+}
+
+.scanner-grid {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.scanner-section {
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }

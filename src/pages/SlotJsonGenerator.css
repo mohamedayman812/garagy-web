@@ -1,0 +1,37 @@
+/* ensure file-inputs are visible on purple */
+.layout-configuration {
+  max-width: 800px;
+  margin: 2rem auto;
+  background: rgba(255,255,255,0.1);
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.input-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: #fff;
+}
+
+.input-group input[type="file"] {
+  display: block;
+  width: 100%;
+  color: #fff;
+  background: rgba(255,255,255,0.2);
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.input-group button {
+  margin-top: 0.5rem;
+}
+
+.slot-canvas {
+  display: block;
+  margin: 2rem auto;
+  border: 2px solid #fff;
+  max-width: 100%;
+  cursor: crosshair;
+}

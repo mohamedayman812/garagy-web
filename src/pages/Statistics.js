@@ -11,7 +11,6 @@ import {
   FaCalendarAlt,
   FaCreditCard,
   FaUsers,
-  FaClock,
   FaArrowUp,
   FaArrowDown,
   FaSpinner,
@@ -46,12 +45,10 @@ const Statistics = () => {
         return
       }
 
-      // ✅ Get admin garageId
       const adminDoc = await getDoc(doc(db, "admins", user.uid))
       if (!adminDoc.exists()) return
       const garageId = adminDoc.data().garageId
 
-      // ✅ Fetch reservations using nested query path
       const reservationsQuery = query(
         collection(db, "reservations"),
         where("garageInfo.garageId", "==", garageId)
@@ -168,14 +165,6 @@ const Statistics = () => {
   const formatCurrency = (amount) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount)
 
-  const formatDate = (date) =>
-    new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date)
-
   if (isLoading) {
     return (
       <div className="statistics-container">
@@ -194,15 +183,15 @@ const Statistics = () => {
           <FaChartLine className="title-icon" />
           Payment Statistics
         </h1>
-        <p className="statistics-subtitle">Comprehensive analysis of your garage revenue and transactions</p>
+        <p className="statistics-subtitle">
+          Comprehensive analysis of your garage revenue and transactions
+        </p>
       </div>
 
-      {/* Metrics */}
+      {/* Metrics Cards Row */}
       <div className="metrics-grid">
         <div className="metric-card revenue">
-          <div className="metric-icon">
-            <FaDollarSign />
-          </div>
+          <div className="metric-icon"><FaDollarSign /></div>
           <div className="metric-content">
             <h3>Total Revenue</h3>
             <p className="metric-value">{formatCurrency(statistics.totalRevenue)}</p>
@@ -214,9 +203,7 @@ const Statistics = () => {
         </div>
 
         <div className="metric-card reservations">
-          <div className="metric-icon">
-            <FaCalendarAlt />
-          </div>
+          <div className="metric-icon"><FaCalendarAlt /></div>
           <div className="metric-content">
             <h3>Total Reservations</h3>
             <p className="metric-value">{statistics.totalReservations}</p>
@@ -224,9 +211,7 @@ const Statistics = () => {
         </div>
 
         <div className="metric-card payments">
-          <div className="metric-icon">
-            <FaCreditCard />
-          </div>
+          <div className="metric-icon"><FaCreditCard /></div>
           <div className="metric-content">
             <h3>Successful Payments</h3>
             <p className="metric-value">{statistics.successfulPayments}</p>
@@ -239,9 +224,7 @@ const Statistics = () => {
         </div>
 
         <div className="metric-card average">
-          <div className="metric-icon">
-            <FaUsers />
-          </div>
+          <div className="metric-icon"><FaUsers /></div>
           <div className="metric-content">
             <h3>Average Amount</h3>
             <p className="metric-value">{formatCurrency(statistics.averageAmount)}</p>
@@ -250,7 +233,7 @@ const Statistics = () => {
         </div>
       </div>
 
-      {/* Graphs */}
+      {/* Charts Section */}
       <div className="charts-section">
         <div className="chart-card">
           <h3 className="chart-title">Monthly Revenue</h3>

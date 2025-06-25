@@ -4,6 +4,7 @@ import {
   Route,
   Routes,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 
 import Navbar from "./components/navbar";
@@ -18,102 +19,55 @@ import GarageLayout from "./pages/GarageLayout";
 import GarageDetails from "./pages/GarageDetails";
 import Payments from "./pages/payments";
 import Reviews from "./pages/reviews";
-import Statistics from "./pages/Statistics"; // ✅ NEW
-import CarScanner from "./pages/CarScanner"
+import Statistics from "./pages/Statistics";
+import CarScanner from "./pages/CarScanner";
+import GenerateCVLayout from "./pages/GenerateCVLayout";
+import SlotJsonGenerator from "./pages/SlotJsonGenerator";
 import ProtectedRoute from "./components/protectedroute";
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const hideUIPaths = ["/", "/login", "/signup"];
+  const shouldHideSidebar = hideUIPaths.includes(location.pathname);
+
   return (
-    <Router>
-      <div className="d-flex flex-column min-vh-100">
-        <Navbar />
-        <div className="flex-grow-1">
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/garage-details" element={<GarageDetails />} />
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-  path="/scan-car"
-  element={
-    <ProtectedRoute>
-      <CarScanner />
-    </ProtectedRoute>
-  }
-/>
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute>
-                  <Reports />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/user-tracking"
-              element={
-                <ProtectedRoute>
-                  <UserTracking />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/garage-layout"
-              element={
-                <ProtectedRoute>
-                  <GarageLayout />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payments"
-              element={
-                <ProtectedRoute>
-                  <Payments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reviews"
-              element={
-                <ProtectedRoute>
-                  <Reviews />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/statistics" 
-              element={
-                <ProtectedRoute>
-                  <Statistics />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </div>
-        <Footer />
+    <div className="app-container">
+      {!shouldHideSidebar && <Navbar />}
+      <div className={`main-content ${shouldHideSidebar ? "full-width" : ""}`}>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/garage-details" element={<GarageDetails />} />
+
+          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/scan-car" element={<ProtectedRoute><CarScanner /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+          <Route path="/user-tracking" element={<ProtectedRoute><UserTracking /></ProtectedRoute>} />
+          <Route path="/garage-layout" element={<ProtectedRoute><GarageLayout /></ProtectedRoute>} />
+          <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+          <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
+          <Route path="/statistics" element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
+
+          <Route path="/generate-cv-layout" element={<ProtectedRoute><GenerateCVLayout /></ProtectedRoute>} />
+          <Route path="/slot-json-gen" element={<ProtectedRoute><SlotJsonGenerator /></ProtectedRoute>} />
+
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
       </div>
-    </Router>
+      <Footer />
+    </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}

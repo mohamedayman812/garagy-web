@@ -4,48 +4,72 @@ import {
   getDocs,
   doc,
   getDoc,
-  collectionGroup,
   query,
+  where
 } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { db } from '../firebase';
 import './reviews.css';
+
+// Chart.js
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchReviewsWithUserData = async () => {
+    const fetchGarageReviews = async () => {
       try {
-        const reviewsSnapshot = await getDocs(collection(db, 'reviews'));
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+        const garageId = adminDoc.exists() ? adminDoc.data().garageId : null;
+        if (!garageId) return;
+
+        const reviewsQuery = query(
+          collection(db, 'reviews'),
+          where('garageInfo.garageId', '==', garageId)
+        );
+        const reviewsSnapshot = await getDocs(reviewsQuery);
 
         const reviewsData = await Promise.all(
           reviewsSnapshot.docs.map(async (docSnap) => {
             const review = docSnap.data();
             const customerId = review.customerInfo?.customerId;
+            const customerName = review.customerInfo?.customerName || 'Unknown';
 
             let userData = {
-              name: 'Unknown',
+              name: customerName,
               phone: 'N/A',
               email: 'N/A',
               carPlate: 'N/A',
-              initials: 'U',
+              initials: customerName.charAt(0).toUpperCase() || 'U',
             };
 
             if (customerId) {
               const userRef = doc(db, 'users', customerId);
               const userSnap = await getDoc(userRef);
-
               if (userSnap.exists()) {
                 const data = userSnap.data();
                 const personal = data.personalInfo || {};
-
-                userData.name = personal.name || 'Unnamed';
+                userData.name = personal.name || customerName;
                 userData.phone = personal.phoneNumber || 'N/A';
                 userData.email = personal.email || 'N/A';
                 userData.initials = userData.name.charAt(0).toUpperCase() || 'U';
 
-                // Fetch vehicle license plate (first one found)
                 const vehiclesRef = collection(db, 'users', customerId, 'vehicles');
                 const vehiclesSnap = await getDocs(vehiclesRef);
                 if (!vehiclesSnap.empty) {
@@ -72,8 +96,43 @@ const Reviews = () => {
       }
     };
 
-    fetchReviewsWithUserData();
+    fetchGarageReviews();
   }, []);
+
+  // Chart preparation
+  const ratingCounts = [0, 0, 0, 0, 0];
+  reviews.forEach(review => {
+    const r = Math.round(review.rating);
+    if (r >= 1 && r <= 5) {
+      ratingCounts[r - 1]++;
+    }
+  });
+
+  const chartData = {
+    labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+    datasets: [
+      {
+        label: 'Number of Reviews',
+        data: ratingCounts,
+        backgroundColor: '#4caf50',
+        borderRadius: 8,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: true },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { precision: 0, stepSize: 1 },
+      },
+    },
+  };
 
   if (loading) {
     return (
@@ -85,27 +144,29 @@ const Reviews = () => {
 
   return (
     <div className="reviews-container">
-      <h2 className="reviews-title">User Reviews</h2>
+      <h2>User Reviews</h2>
+
+      {/* Chart Display */}
+      <div style={{ width: '100%', maxWidth: '600px', marginBottom: '40px' }}>
+        <h3 style={{ color: 'white', textAlign: 'center' }}>Rating Distribution</h3>
+        <Bar data={chartData} options={chartOptions} />
+      </div>
+
       {reviews.length === 0 ? (
-        <p className="no-reviews">No reviews available.</p>
+        <p>No reviews available.</p>
       ) : (
-        reviews.map((review, index) => (
-          <div key={index} className="review-card">
-            <div className="user-header">
-              <div className="user-avatar">{review.user.initials}</div>
-              <div className="user-info">
-                <h4>{review.user.name}</h4>
-                <p>{review.user.email}</p>
-                <p> 📞 {review.user.phone}</p>
-                <p>Licence Plate: {review.user.carPlate}</p>
-              </div>
+        <div className="reviews-grid">
+          {reviews.map((review, index) => (
+            <div key={index} className="review-card">
+              <strong>{review.user.name}</strong>
+              <p>{review.user.email}</p>
+              <p>📞 {review.user.phone}</p>
+              <p>License Plate: {review.user.carPlate}</p>
+              <p>"{review.description}"</p>
+              <small>⭐ Rating: {review.rating} / 5</small>
             </div>
-            <div className="review-body">
-              <p className="review-description">"{review.description}"</p>
-              <p className="review-rating">⭐ Rating: {review.rating} / 5</p>
-            </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );

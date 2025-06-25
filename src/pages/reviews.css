@@ -1,63 +1,86 @@
-/* Background similar to login */
 .reviews-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    padding: 40px 20px;
-    background: linear-gradient(135deg, #292d3d 0%, #764ba2 100%);
-    background-size: 200% 200%;
-    animation: gradientAnimation 10s ease infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+   background: linear-gradient(135deg, #292d3d 0%, #764ba2 100%);
+  background-size: 200% 200%;
+  animation: gradientAnimation 10s ease infinite;
 }
 
-/* Reuse animation from login */
 @keyframes gradientAnimation {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .reviews-container h2 {
-    color: #fff;
-    font-size: 2rem;
-    margin-bottom: 30px;
+  color: #fff;
+  font-size: 2rem;
+  margin-bottom: 30px;
 }
 
-/* Review card styled like glassmorphism */
+/* Summary Chart Section */
+.rating-summary {
+  text-align: center;
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+.rating-graph {
+  margin-top: 10px;
+  max-width: 600px;
+  width: 90%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  background: rgba(212, 205, 205, 0.05);
+}
+
+/* Reviews Grid - 3 per row */
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  justify-items: center;
+}
+
+/* Glass style Review Card */
 .review-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 30px;
-    width: 100%;
-    max-width: 600px;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    transition: background 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  width: 100%;
+  max-width: 350px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transition: background 0.3s ease;
 }
 
 .review-card:hover {
-    background: rgba(255, 255, 255, 0.15);
+  background: white(255, 255, 255, 0.15);
 }
 
 .review-card p {
-    margin: 8px 0;
-    line-height: 1.5;
-    font-size: 1rem;
+  margin: 8px 0;
+  line-height: 1.5;
+  font-size: 1rem;
 }
 
-/* For small print info */
 .review-card small {
-    display: block;
-    margin-top: 6px;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
+  display: block;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
 }
